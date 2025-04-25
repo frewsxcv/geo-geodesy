@@ -1,0 +1,12 @@
+[package]
+name = "geo-geodesy"
+version = "1.0.0"
+edition = "2021"
+description = "Geodesy integration with the geo crate"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/frewsxcv/geo-geodesy"
+
+[dependencies]
+geodesy = { version = "0.13", default-features = false }
+crs-definitions = "0.3"
+geo = "0.29"
