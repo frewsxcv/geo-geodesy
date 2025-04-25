@@ -8,7 +8,7 @@
 
 use geo::{Coord, MapCoords};
 
-pub use geodesy::{Context, Minimal, OpHandle};
+use geodesy::Context;
 
 #[derive(Debug)]
 pub enum Error {
@@ -84,14 +84,6 @@ impl Transformer {
 
         Ok(())
     }
-}
-
-pub fn lookup_epsg_code(epsg_code: u16) -> Result<(geodesy::Minimal, geodesy::OpHandle), Error> {
-    let mut ctx = geodesy_ctx();
-    let def = crs_definitions::from_code(epsg_code).ok_or(Error::UnknownEpsgCode(epsg_code))?;
-    let source_geodesy_string = geodesy::parse_proj(def.proj4)?;
-    let op_handle = ctx.op(&source_geodesy_string)?;
-    Ok((ctx, op_handle))
 }
 
 fn geodesy_ctx() -> geodesy::Minimal {
