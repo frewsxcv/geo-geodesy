@@ -1,6 +1,6 @@
 [package]
 name = "geo-geodesy"
-version = "3.0.0"
+version = "4.0.0"
 edition = "2021"
 description = "Geodesy integration with the geo crate"
 license = "MIT/Apache-2.0"

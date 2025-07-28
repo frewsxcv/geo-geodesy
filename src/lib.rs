@@ -37,19 +37,18 @@ impl From<geodesy::Error> for Error {
     }
 }
 
-pub struct Transformer {
-    ctx: geodesy::Minimal,
+pub struct Transformer<'a, C: geodesy::Context> {
+    ctx: &'a C,
     source: geodesy::OpHandle,
     target: geodesy::OpHandle,
 }
 
-impl Transformer {
-    pub fn from_epsg(source_crs: u16, target_crs: u16) -> Result<Self, Error> {
+impl<'a, C: geodesy::Context> Transformer<'a, C> {
+    pub fn from_epsg(ctx: &'a mut C, source_crs: u16, target_crs: u16) -> Result<Self, Error> {
         let source =
             crs_definitions::from_code(source_crs).ok_or(Error::UnknownEpsgCode(source_crs))?;
         let target =
             crs_definitions::from_code(target_crs).ok_or(Error::UnknownEpsgCode(target_crs))?;
-        let mut ctx = geodesy_ctx();
         let source_geodesy_string = geodesy::parse_proj(source.proj4)?;
         let source_op_handle = ctx.op(&source_geodesy_string)?;
         let target_geodesy_string = geodesy::parse_proj(target.proj4)?;
@@ -62,7 +61,7 @@ impl Transformer {
     }
 
     pub fn from_geodesy(
-        ctx: geodesy::Minimal,
+        ctx: &'a C,
         source: geodesy::OpHandle,
         target: geodesy::OpHandle,
     ) -> Result<Self, Error> {
