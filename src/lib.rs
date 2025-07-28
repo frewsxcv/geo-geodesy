@@ -44,7 +44,7 @@ pub struct Transformer {
 }
 
 impl Transformer {
-    pub fn setup(source_crs: u16, target_crs: u16) -> Result<Self, Error> {
+    pub fn from_epsg(source_crs: u16, target_crs: u16) -> Result<Self, Error> {
         let source =
             crs_definitions::from_code(source_crs).ok_or(Error::UnknownEpsgCode(source_crs))?;
         let target =
@@ -58,6 +58,18 @@ impl Transformer {
             ctx,
             source: source_op_handle,
             target: target_op_handle,
+        })
+    }
+
+    pub fn from_geodesy(
+        ctx: geodesy::Minimal,
+        source: geodesy::OpHandle,
+        target: geodesy::OpHandle,
+    ) -> Result<Self, Error> {
+        Ok(Transformer {
+            ctx,
+            source,
+            target,
         })
     }
 
