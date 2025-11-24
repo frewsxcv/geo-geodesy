@@ -9,4 +9,4 @@ repository = "https://github.com/frewsxcv/geo-geodesy"
 [dependencies]
 geodesy = { version = "0.13", default-features = false }
 crs-definitions = "0.3"
-geo = { version = "0.30", default-features = false }
+geo = { version = "0.31", default-features = false }
