@@ -92,9 +92,9 @@ dependencies = [
 
 [[package]]
 name = "geodesy"
-version = "0.13.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42fe16d603414f308e67e919e27eabb75b1e37fa5a6b0d975a2aae186f19b7e6"
+checksum = "1c1778eaef1f258c89d8d3f0fadb42ef70f4c714d237714fede0936285661c20"
 dependencies = [
  "float_eq",
  "log",

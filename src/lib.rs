@@ -8,7 +8,7 @@
 
 use geo::{Coord, MapCoords};
 
-use geodesy::Context;
+use geodesy::ctx::Context;
 
 #[derive(Debug)]
 pub enum Error {
@@ -37,21 +37,21 @@ impl From<geodesy::Error> for Error {
     }
 }
 
-pub struct Transformer<'a, C: geodesy::Context> {
+pub struct Transformer<'a, C: geodesy::ctx::Context> {
     ctx: &'a C,
-    source: geodesy::OpHandle,
-    target: geodesy::OpHandle,
+    source: geodesy::ctx::OpHandle,
+    target: geodesy::ctx::OpHandle,
 }
 
-impl<'a, C: geodesy::Context> Transformer<'a, C> {
+impl<'a, C: geodesy::ctx::Context> Transformer<'a, C> {
     pub fn from_epsg(ctx: &'a mut C, source_crs: u16, target_crs: u16) -> Result<Self, Error> {
         let source =
             crs_definitions::from_code(source_crs).ok_or(Error::UnknownEpsgCode(source_crs))?;
         let target =
             crs_definitions::from_code(target_crs).ok_or(Error::UnknownEpsgCode(target_crs))?;
-        let source_geodesy_string = geodesy::parse_proj(source.proj4)?;
+        let source_geodesy_string = geodesy::authoring::parse_proj(source.proj4)?;
         let source_op_handle = ctx.op(&source_geodesy_string)?;
-        let target_geodesy_string = geodesy::parse_proj(target.proj4)?;
+        let target_geodesy_string = geodesy::authoring::parse_proj(target.proj4)?;
         let target_op_handle = ctx.op(&target_geodesy_string)?;
         Ok(Transformer {
             ctx,
@@ -62,8 +62,8 @@ impl<'a, C: geodesy::Context> Transformer<'a, C> {
 
     pub fn from_geodesy(
         ctx: &'a C,
-        source: geodesy::OpHandle,
-        target: geodesy::OpHandle,
+        source: geodesy::ctx::OpHandle,
+        target: geodesy::ctx::OpHandle,
     ) -> Result<Self, Error> {
         Ok(Transformer {
             ctx,
@@ -77,7 +77,7 @@ impl<'a, C: geodesy::Context> Transformer<'a, C> {
         geometry: &mut geo::Geometry<Scalar>,
     ) -> Result<(), Error> {
         let mut transformed = geometry.try_map_coords::<Error>(|coord| {
-            let mut coord = [geodesy::Coor2D::gis(
+            let mut coord = [geodesy::coord::Coor2D::gis(
                 coord.x.to_f64().ok_or(Error::CouldNotConvertToF64)?,
                 coord.y.to_f64().ok_or(Error::CouldNotConvertToF64)?,
             )];
@@ -98,6 +98,6 @@ impl<'a, C: geodesy::Context> Transformer<'a, C> {
     }
 }
 
-fn geodesy_ctx() -> geodesy::Minimal {
-    geodesy::Minimal::new()
+fn geodesy_ctx() -> geodesy::ctx::Minimal {
+    geodesy::ctx::Minimal::new()
 }
