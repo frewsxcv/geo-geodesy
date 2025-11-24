@@ -85,9 +85,10 @@ impl<'a, C: geodesy::Context> Transformer<'a, C> {
                 .apply(self.source, geodesy::Direction::Inv, &mut coord)?;
             self.ctx
                 .apply(self.target, geodesy::Direction::Fwd, &mut coord)?;
+            // Geodesy outputs coordinates in radians, so we need to convert them back to degrees
             Ok(Coord {
-                x: Scalar::from(coord[0].0[0]).ok_or(Error::CouldNotConvertFromF64)?,
-                y: Scalar::from(coord[0].0[1]).ok_or(Error::CouldNotConvertFromF64)?,
+                x: Scalar::from(coord[0].0[0].to_degrees()).ok_or(Error::CouldNotConvertFromF64)?,
+                y: Scalar::from(coord[0].0[1].to_degrees()).ok_or(Error::CouldNotConvertFromF64)?,
             })
         })?;
 
