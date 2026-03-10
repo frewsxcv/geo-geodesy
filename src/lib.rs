@@ -120,3 +120,63 @@ impl<'a, C: geodesy::ctx::Context> Transformer<'a, C> {
 fn geodesy_ctx() -> geodesy::ctx::Minimal {
     geodesy::ctx::Minimal::new()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use geo::{Geometry, Point};
+
+    /// Regression test: transforming from a geographic CRS (EPSG:4326) to a
+    /// projected CRS (EPSG:3857 / Web Mercator) must preserve metre values.
+    ///
+    /// Before the fix, `Transformer::transform()` unconditionally called
+    /// `.to_degrees()` on the output coordinates, which multiplied the metre
+    /// values by 180/pi (~57.3), corrupting them.
+    #[test]
+    fn projected_crs_output_not_corrupted_by_to_degrees() {
+        let mut ctx = geodesy_ctx();
+        // EPSG:4326 = WGS 84 geographic (degrees)
+        // EPSG:3857 = Web Mercator (metres)
+        let transformer = Transformer::from_epsg(&mut ctx, 4326, 3857)
+            .expect("failed to create transformer");
+
+        // London: approximately 51.5074 N, -0.1278 W
+        let mut geometry: Geometry<f64> = Point::new(-0.1278, 51.5074).into();
+        transformer
+            .transform(&mut geometry)
+            .expect("transform failed");
+
+        let point = match &geometry {
+            Geometry::Point(p) => p,
+            other => panic!("expected Point, got {:?}", other),
+        };
+
+        // Web Mercator coordinates for London are roughly:
+        //   x ≈ -14,226 m, y ≈ 6,711,344 m
+        // The key invariant: if to_degrees() were wrongly applied, x and y
+        // would be ~57.3x too large. We check that the values are in the
+        // expected ballpark (within 1% of reference values).
+        let expected_x: f64 = -14_226.0;
+        let expected_y: f64 = 6_711_344.0;
+
+        let x_err = (point.x() - expected_x).abs() / expected_x.abs();
+        let y_err = (point.y() - expected_y).abs() / expected_y.abs();
+
+        assert!(
+            x_err < 0.01,
+            "x coordinate {:.1} deviates from expected {:.1} by {:.1}% — \
+             likely corrupted by to_degrees()",
+            point.x(),
+            expected_x,
+            x_err * 100.0,
+        );
+        assert!(
+            y_err < 0.01,
+            "y coordinate {:.1} deviates from expected {:.1} by {:.1}% — \
+             likely corrupted by to_degrees()",
+            point.y(),
+            expected_y,
+            y_err * 100.0,
+        );
+    }
+}
