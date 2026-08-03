@@ -1,3 +1,5 @@
+**⚠️ This repository has moved to <https://tangled.org/rwell.org/geo-geodesy> ⚠️**
+
 # geo-geodesy
 
 A crate providing `geodesy` operations for the `geo` crate, enabling coordinate transformations between different Coordinate Reference Systems (CRS) using EPSG codes.
